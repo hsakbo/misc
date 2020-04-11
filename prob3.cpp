@@ -9,28 +9,28 @@
 using namespace std;
 typedef long long int lint;
 
-void DEBUGvl(vector<lint>);
-void DEBUGop(vector<char>);
+void DEBUGvl(vector<lint>); //use this to print a vector with matching type
+void DEBUGop(vector<char>); //use this to print a vector with matching type
 
-lint _MAX = ~((unsigned long long int)0) >> 1;
-lint _MIN = ~_MAX;
+lint _MAX = ~((unsigned long long int)0) >> 1; //maximum int64 val
+lint _MIN = ~_MAX; //minimum int 64 value
 
 typedef struct min_and_max
 {
   lint min{_MAX};
   lint max{_MIN};
-}mm;
+}mm; //the array table is filled using these
 
 typedef unordered_map<string, mm> memo;
 
 void DEBUGmax(vector<vector<mm>> &);
 void DEBUGmin(vector<vector<mm>> &);
-int MaxValueOfExp(string exp);
 mm naive_alg(vector<lint> &, vector<char> &, int, int, memo &);
 
 lint naive_main(const string &);
 
-lint eval(lint a, lint b, char op) {
+lint eval(lint a, lint b, char op)
+{
 
   if (op == '*') 
     return a * b;
@@ -45,6 +45,10 @@ lint eval(lint a, lint b, char op) {
     assert(0);
 }
 
+//the inner most loop is here in the tabulation approach
+//note that the array indexing is different from the lectures.
+//I suspect this is what causes the error, but I cannot prove it.
+//try using my debug functions to see the array.
 const mm find_mm(const vector<vector<mm>> arr, int i, int j,
                     const vector<char> &ops)
 {
@@ -55,7 +59,8 @@ const mm find_mm(const vector<vector<mm>> arr, int i, int j,
       mm p1 = arr[k][k+j-i];
       mm p2 = arr[i-1-k][j];
       int k1 = j-i+k;
-      
+
+      //four possibility check below
       int tmp = eval(p1.max, p2.max, ops[k1]);
       if (tmp > retval.max)
 	retval.max = tmp;
@@ -88,6 +93,7 @@ const mm find_mm(const vector<vector<mm>> arr, int i, int j,
   return retval;
 }
 
+//handles the main logic for tabulation approach
 lint main_alg(const vector<lint> &nums, const vector<char> &ops)
 {
   vector<vector<mm>> arr(ops.size()+1, vector<mm>(nums.size()));
@@ -101,15 +107,14 @@ lint main_alg(const vector<lint> &nums, const vector<char> &ops)
     {
       for (int j = i; j < nums.size(); j++)
 	{
-	  //f[i,j] --> f[i,k] & f[k+a1, j]
 	  arr[i][j] = find_mm(arr, i, j, ops);
 	}
     }
-  //DEBUGmax(arr);
-  //DEBUGmin(arr);
+
   return arr[ops.size()][nums.size()-1].max;  
 }
 
+//wrapper function for tabulation approach
 lint get_maximum_value(const string &exp) {
   //write your code here
   vector<lint> nums{};
@@ -133,6 +138,7 @@ lint get_maximum_value(const string &exp) {
   return main_alg(nums, ops);
 }
 
+//debug utils
 void test1();
 void test2();
 
@@ -142,9 +148,11 @@ int main()
   //test2();
   string s;
   getline(cin, s);
-  //cout << s << endl;
+
   cout << naive_main(s) << '\n';
 }
+
+//hard coded testing
 void test1()
 {
   
@@ -152,20 +160,21 @@ void test1()
   string s2 = "4 - 9 + 0 - 7";
   string s3 = "5 - 8 + 7 * 4 - 8 + 9";
   string s4 = "2 * 4 + 3";
-  //cout << naive_main(s2) << endl;
+  
   cout << naive_main(s2) << endl;
   cout << get_maximum_value(s2) << endl;
-  //MaxValueOfExp(string exp)
 
 }
 
+//debug utils -- the inifinite loop change size (make sure its even)
 void test2()
 {
   random_device seed;
   mt19937 gen(seed());
   uniform_int_distribution<int> dist(0, 9);
   uniform_int_distribution<int> distop(0, 2);
-
+  int size = 30;
+  
   string start;
   int wrong, correct;
   lint status = 0;
@@ -175,7 +184,7 @@ void test2()
       start = "";
       int tmp = dist(gen);
       start += to_string(tmp);
-      for (int i = 0; i < 300; i++)
+      for (int i = 0; i < size; i++)
 	{
 	  if (i % 2)
 	    {
@@ -218,7 +227,7 @@ void test2()
   cout << "returned:\t" << wrong << endl;
 }
 
-
+//debug utils
 void DEBUGvl(vector<lint> a)
 {
   cout << "DEBUGvl (" << a.size() << "): ";
@@ -230,6 +239,7 @@ void DEBUGvl(vector<lint> a)
   cout << endl;
 }
 
+//debug utils
 void DEBUGop(vector<char> a)
 {
   cout << "DEBUGop (" << a.size() << "): ";
@@ -241,6 +251,7 @@ void DEBUGop(vector<char> a)
   cout << endl;
 }
 
+//debug utils
 void DEBUGmax(vector<vector<mm>> &arr)
 {
   cout << "DEBUG max (" << arr.size() << "x" << arr[0].size()
@@ -259,6 +270,7 @@ void DEBUGmax(vector<vector<mm>> &arr)
     }
 }
 
+//debug utils
 void DEBUGmin(vector<vector<mm>> &arr)
 {
   cout << "DEBUG min (" << arr.size() << "x" << arr[0].size()
@@ -278,6 +290,7 @@ void DEBUGmin(vector<vector<mm>> &arr)
     }
 }
 
+//top down approach
 mm naive_alg(vector<lint> &nums, vector<char> &ops, int i, int j, memo &data)
 {
   mm retval;
@@ -318,7 +331,8 @@ mm naive_alg(vector<lint> &nums, vector<char> &ops, int i, int j, memo &data)
 	
       else
 	r_right = data[r];
-      
+
+      //the code below checks the four possibilities.
       int tmp = eval(r_left.min, r_right.min, ops[k]);
       if (retval.min > tmp)
 	retval.min = tmp;
@@ -349,6 +363,8 @@ mm naive_alg(vector<lint> &nums, vector<char> &ops, int i, int j, memo &data)
   return retval;
 }
 
+
+//wrapper function for the recursive top-down algorithm above
 lint naive_main(const string &exp)
 {
   //write your code here
@@ -370,12 +386,7 @@ lint naive_main(const string &exp)
     }
   nums.push_back(stoi(tmp));
   memo data;
-
-  if (data.find("1 2") != data.end())
-    assert(0);
   
   lint ret = naive_alg(nums, ops, 0, nums.size()-1, data).max;
-  
-  
   return ret;
 }
