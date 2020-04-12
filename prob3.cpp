@@ -3,14 +3,13 @@
 #include <string>
 #include <vector>
 #include <random>
-#include <cctype>
 #include <unordered_map>
 
 using namespace std;
 typedef long long int lint;
 
-void DEBUGvl(vector<lint>); //use this to print a vector with matching type
-void DEBUGop(vector<char>); //use this to print a vector with matching type
+void DEBUGvl(vector<lint>); //use this to print a vector with matching type (numbers)
+void DEBUGop(vector<char>); //use this to print a vector with matching type (operations)
 
 lint _MAX = ~((unsigned long long int)0) >> 1; //maximum int64 val
 lint _MIN = ~_MAX; //minimum int 64 value
@@ -23,8 +22,8 @@ typedef struct min_and_max
 
 typedef unordered_map<string, mm> memo;
 
-void DEBUGmax(vector<vector<mm>> &);
-void DEBUGmin(vector<vector<mm>> &);
+void DEBUGmax(vector<vector<mm>> &); //prints 2d array max vals
+void DEBUGmin(vector<vector<mm>> &); //prints 2d array min vals
 mm naive_alg(vector<lint> &, vector<char> &, int, int, memo &);
 
 lint naive_main(const string &);
@@ -48,6 +47,8 @@ lint eval(lint a, lint b, char op)
 //the inner most loop is here in the tabulation approach
 //note that the array indexing is different from the lectures.
 //I suspect this is what causes the error, but I cannot prove it.
+//additionally, I did use outside source that is congruent with
+//the lectures but it too got stuck in the same problem.
 //try using my debug functions to see the array.
 const mm find_mm(const vector<vector<mm>> arr, int i, int j,
                     const vector<char> &ops)
@@ -61,31 +62,31 @@ const mm find_mm(const vector<vector<mm>> arr, int i, int j,
       int k1 = j-i+k;
 
       //four possibility check below
-      int tmp = eval(p1.max, p2.max, ops[k1]);
+      lint tmp = eval(p1.max, p2.max, ops[k1]);
       if (tmp > retval.max)
 	retval.max = tmp;
-      else if (tmp < retval.min)
+      if (tmp < retval.min)
 	retval.min = tmp;
 
       tmp = eval(p1.min, p2.max, ops[k1]);
 
       if (tmp > retval.max)
 	retval.max = tmp;
-      else if (tmp < retval.min)
+      if (tmp < retval.min)
 	retval.min = tmp;
       
       tmp = eval(p1.max, p2.min, ops[k1]);
       
       if (tmp > retval.max)
 	retval.max = tmp;
-      else if (tmp < retval.min)
+      if (tmp < retval.min)
 	retval.min = tmp;
 
       tmp = eval(p1.min, p2.min, ops[k1]);
       
       if (tmp > retval.max)
 	retval.max = tmp;
-      else if (tmp < retval.min)
+      if (tmp < retval.min)
 	retval.min = tmp;       
       
     }
@@ -148,32 +149,31 @@ int main()
   //test2();
   string s;
   getline(cin, s);
-
-  cout << naive_main(s) << '\n';
+  cout << get_maximum_value(s) << '\n'; 
+  
 }
 
 //hard coded testing
 void test1()
 {
   
-  string s1 = "3 - 7 - 1 - 1 * 2";
-  string s2 = "4 - 9 + 0 - 7";
+  string s1 = "3 - 7 - 1 - 1 * 2"; //spaces are redundant
+  string s2 = "4 - 9 + 0 - 7";     //but adds readability
   string s3 = "5 - 8 + 7 * 4 - 8 + 9";
-  string s4 = "2 * 4 + 3";
-  
+  string s4 = "2*4+3";
+  //cout << stoi(s4) << endl;
   cout << naive_main(s2) << endl;
   cout << get_maximum_value(s2) << endl;
-
 }
 
-//debug utils -- the inifinite loop change size (make sure its even)
+//debug utils -- the inifinite loop. (make sure size is even)
 void test2()
 {
   random_device seed;
   mt19937 gen(seed());
-  uniform_int_distribution<int> dist(0, 9);
-  uniform_int_distribution<int> distop(0, 2);
-  int size = 30;
+  uniform_int_distribution<int> dist(0, 9); //symbol range
+  uniform_int_distribution<int> distop(0, 2); //for ops
+  int size = 30; //size = 30 is 31 symbols.
   
   string start;
   int wrong, correct;
@@ -304,13 +304,6 @@ mm naive_alg(vector<lint> &nums, vector<char> &ops, int i, int j, memo &data)
       
       return retval;
     }
-  else if (i+1 == j)
-    {
-      retval.max = eval(nums[i], nums[j], ops[i]);
-      retval.min = retval.max;
-      data.insert(pair<string,mm>(l_str,retval));
-      return retval;
-    }
 
   for (int k = i; k < j; k++)
     {
@@ -333,28 +326,28 @@ mm naive_alg(vector<lint> &nums, vector<char> &ops, int i, int j, memo &data)
 	r_right = data[r];
 
       //the code below checks the four possibilities.
-      int tmp = eval(r_left.min, r_right.min, ops[k]);
+      lint tmp = eval(r_left.min, r_right.min, ops[k]);
       if (retval.min > tmp)
 	retval.min = tmp;
-      else if (retval.max < tmp)
+      if (retval.max < tmp)
 	retval.max = tmp;
 
       tmp = eval(r_left.min, r_right.max, ops[k]);
       if (retval.min > tmp)
 	retval.min = tmp;
-      else if (retval.max < tmp)
+      if (retval.max < tmp)
 	retval.max = tmp;
 
       tmp = eval(r_left.max, r_right.min, ops[k]);
       if (retval.min > tmp)
 	retval.min = tmp;
-      else if (retval.max < tmp)
+      if (retval.max < tmp)
 	retval.max = tmp;
 
       tmp = eval(r_left.max, r_right.max, ops[k]);
       if (retval.min > tmp)
 	retval.min = tmp;
-      else if (retval.max < tmp)
+      if (retval.max < tmp)
 	retval.max = tmp;
       
     }
@@ -385,8 +378,8 @@ lint naive_main(const string &exp)
 	}
     }
   nums.push_back(stoi(tmp));
+
   memo data;
-  
   lint ret = naive_alg(nums, ops, 0, nums.size()-1, data).max;
   return ret;
 }
