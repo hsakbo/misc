@@ -1,0 +1,5 @@
+/usr/bin/ld: /tmp/ccrYOjxA.o: in function `main':
+avl.cpp:(.text.startup+0x23f): undefined reference to `avl::size(avl_tree_node*)'
+collect2: error: ld returned 1 exit status
+
+************--- BUILD g++ FAILED ---************
