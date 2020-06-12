@@ -48,11 +48,11 @@ void fibqueue<T>::decrease(void* nd, T item)
     return;
   
   target->data = item;
-
-  if (target->up)
+  node* p = target->up;
+  if (p)
     {
       cut(target);
-      cascade_cut(target->up);
+      cascade_cut(p);
     }
 
   if (item < rlist->data)
@@ -197,7 +197,7 @@ void fibqueue<T>::consolidate()
       x = roots[i];
       d = x->degree;
             
-      while (arr[d] && arr[d] != x)
+      while (arr[d])
 	{
 	  if (x->data > arr[d]->data)
 	    {
